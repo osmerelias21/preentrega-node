@@ -1,104 +1,96 @@
-const BASE_URL = "https://6aceb5c8f338359cf1c3a1dc.mockapi.io";
+console.log("Inicio de programa");
 
-console.log("--- Gestor CLI de Productos ---");
+const args = process.argv.slice(2);
 
-const inputArgs = process.argv.slice(2);
-const accion = inputArgs[0];
-
-
-async function listarProductos(endpoint) {
+async function obtenerProductos(url) {
     try {
-       const respuesta = await fetch(`${BASE_URL}/${endpoint}`);
-        if (!respuesta.ok) {
-            console.log("Error: No se pudo obtener la información de la API.");
+        const response = await fetch(`https://6ac4673d54a61668c5f57ff4.mockapi.io/${url}`);
+        if (!response.ok) {
+            console.log("Error en el servidor o respuesta no valida");
             return;
         }
-        const datos = await respuesta.json();
-        return datos;
-    } catch (err) {
-        console.log("Error de red o conexión:", err.message);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.log("Error de conexion:", error.message);
     }
 }
 
-
-async function borrarProducto(endpoint) {
+async function eliminarProducto(producto) {
     try {
-       const respuesta = await fetch(`${BASE_URL}/${endpoint}`, {
+        const response = await fetch(`https://6ac4673d54a61668c5f57ff4.mockapi.io/${producto}`, {
             method: "DELETE"
         });
-        if (!respuesta.ok) {
-            console.log("Error: No se pudo eliminar el recurso solicitado.");
+        if (!response.ok) {
+            console.log("Error en el servidor al intentar eliminar");
             return;
         }
-        const datos = await respuesta.json();
-        return datos;
-    } catch (err) {
-        console.log("Error de red o conexión:", err.message);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.log("Error de conexion:", error.message);
     }
 }
 
-
-async function guardarProducto(item) {
+async function crearProducto(producto) {
     try {
-        const respuesta = await fetch(`${BASE_URL}/products`, {
+        const response = await fetch("https://6ac4673d54a61668c5f57ff4.mockapi.io/products", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(item)
+            body: JSON.stringify(producto)
         });
-        
-        if (respuesta.ok) {
-            const datos = await respuesta.json();
-            console.log("Respuesta de la API:", datos);
-            console.log("ID asignado:", datos.id);
+        if (response.ok) {
+            const data = await response.json();
+            console.log(data);
+            console.log("Id del producto creado: ", data.id);
         } else {
-            console.log("Error: No se pudo guardar el registro en la API.");
+            console.log("No se pudo crear el producto en la API");
         }
-    } catch (err) {
-        console.log("Error de red o conexión:", err.message);
+    } catch (error) {
+        console.log("Error de conexion:", error.message);
     }
 }
 
-
-switch (accion) {
+switch (args[0]) {
     case "GET":
-        console.log("Ejecutando consulta GET...");
-        if (inputArgs[1] && inputArgs[1].startsWith("products")) {
-            const respuesta = await listarProductos(inputArgs[1]);
-            if (respuesta) {
-                console.log(respuesta);
+        console.log(args[0]);
+        if (args[1] && args[1].startsWith("products")) {
+            const resultado = await obtenerProductos(args[1]);
+            if (resultado) {
+                console.log(resultado);
             }
         } else {
-            console.log("Error: Formato de comando inválido.");
+            console.log("Comando incorrecto");
         }
         break;
 
     case "POST":
-        console.log("Ejecutando alta POST...");
-        if (inputArgs[1] === "products" && inputArgs[2] && inputArgs[3] && inputArgs[4]) {
-            const itemNuevo = {
-                title: inputArgs[2],
-                price: inputArgs[3],
-                category: inputArgs[4]
+        console.log(args[0]);
+        if (args[1] === "products" && args[2] && args[3] && args[4]) {
+            const nuevoProducto = {
+                title: args[2],
+                price: args[3],
+                category: args[4]
             };
-            await guardarProducto(itemNuevo);
-            console.log("¡Producto registrado con éxito!");
+            await crearProducto(nuevoProducto);
+            console.log("Producto creado");
         } else {
-            console.log("Error: Faltan argumentos para registrar el producto.");
+            console.log("Comando incompleto o incorrecto");
         }
         break;
 
     case "DELETE":
-        console.log("Ejecutando baja DELETE...");
-        if (inputArgs[1] && inputArgs[1].startsWith("products/") && inputArgs[1].length > 9) {
-            const borrado = await borrarProducto(inputArgs[1]);
-            if (borrado) {
-                console.log("Confirmación de borrado:", borrado);
+        console.log(args[0]);
+        if (args[1] && args[1].startsWith("products/") && args[1].length > 9) {
+            const resultado = await eliminarProducto(args[1]);
+            if (resultado) {
+                console.log("Producto eliminado ", resultado);
             }
         } else {
-            console.log("Error: Especificá el ID a eliminar (ejemplo: products/1).");
+            console.log("Comando incompleto o incorrecto");
         }
         break;
 
     default:
-        console.log("Operación no reconocida. Usá GET, POST o DELETE.");
+        console.log("Comando incorrecto");
 }
